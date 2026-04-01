@@ -1,3 +1,5 @@
+package com.example.praktikumtam_2417051001
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,9 +32,6 @@ import com.example.praktikumtam_2417051001.ui.theme.PraktikumTAM_2417051001Theme
 val BgTop = Color(0xFFFFF1F5)
 val BgMid = Color(0xFFEDE7FF)
 val BgBottom = Color(0xFFE0F7FA)
-val CardWhite = Color(0xFFFFFFFF)
-val TitleColor = Color(0xFF2D2D2D)
-val SubColor = Color(0xFF7A7A7A)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +62,6 @@ class MainActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.spacedBy(22.dp)
                         ) {
 
-                            // ===== HEADER =====
                             item {
                                 Text(
                                     text = "Aktivitas Populer",
@@ -94,7 +92,6 @@ class MainActivity : ComponentActivity() {
                                 Spacer(modifier = Modifier.height(6.dp))
                             }
 
-                            // ===== LIST UTAMA =====
                             items(ActivityDay.dummyActivity) { activity ->
                                 ActivityCard(activity)
                             }
