@@ -20,18 +20,16 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
-    // State untuk data profil
-    var nama by remember { mutableStateOf("Pengguna Keren") }
-    var email by remember { mutableStateOf("pengguna@email.com") }
+fun ProfileScreen(email: String, onNavigateBack: () -> Unit, onLogout: () -> Unit) {
+    var nama by remember { mutableStateOf("Chayya") }
 
-    // State untuk kontrol UI
+    var currentEmail by remember { mutableStateOf(if (email.isNotBlank()) email else "chayya@email.com") }
+
     var isEditing by remember { mutableStateOf(false) }
     var notifikasiAktif by remember { mutableStateOf(true) }
 
-    // State sementara untuk form edit
     var tempNama by remember { mutableStateOf(nama) }
-    var tempEmail by remember { mutableStateOf(email) }
+    var tempEmail by remember { mutableStateOf(currentEmail) }
 
     Scaffold(
         topBar = {
@@ -54,7 +52,6 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Foto Profil
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -67,7 +64,6 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             if (isEditing) {
-                // TAMPILAN MODE EDIT
                 OutlinedTextField(
                     value = tempNama,
                     onValueChange = { tempNama = it },
@@ -96,7 +92,7 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
                     Button(
                         onClick = {
                             nama = tempNama
-                            email = tempEmail
+                            currentEmail = tempEmail
                             isEditing = false
                         },
                         modifier = Modifier.weight(1f).height(50.dp),
@@ -106,15 +102,14 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
                     }
                 }
             } else {
-                // TAMPILAN MODE LIHAT
                 Text(nama, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text(email, color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
+                Text(currentEmail, color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
                         tempNama = nama
-                        tempEmail = email
+                        tempEmail = currentEmail
                         isEditing = true
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -127,10 +122,9 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
-                Divider(color = Color.LightGray, thickness = 1.dp)
+                HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Bagian Pengaturan
                 Text(
                     "Pengaturan",
                     style = MaterialTheme.typography.titleMedium,
@@ -139,7 +133,6 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Toggle Notifikasi
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -158,7 +151,6 @@ fun ProfileScreen(onNavigateBack: () -> Unit, onLogout: () -> Unit) {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Tombol Keluar
                 OutlinedButton(
                     onClick = onLogout,
                     modifier = Modifier.fillMaxWidth().height(50.dp),

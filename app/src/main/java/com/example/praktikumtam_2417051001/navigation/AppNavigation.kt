@@ -1,9 +1,14 @@
 package com.example.praktikumtam_2417051001.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.praktikumtam_2417051001.MainViewModel
 import com.example.praktikumtam_2417051001.model.ActivityModel
 import com.example.praktikumtam_2417051001.uii.auth.LoginScreen
 import com.example.praktikumtam_2417051001.uii.auth.RegisterScreen
@@ -15,13 +20,22 @@ import com.example.praktikumtam_2417051001.uii.mission.MissionScreen
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val mainViewModel: MainViewModel = viewModel()
     var selectedActivity by remember { mutableStateOf<ActivityModel?>(null) }
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(
+        navController = navController,
+        startDestination = "login",
+        enterTransition = { slideInHorizontally(animationSpec = tween(350)) { it } },
+        exitTransition = { slideOutHorizontally(animationSpec = tween(350)) { -it } },
+        popEnterTransition = { slideInHorizontally(animationSpec = tween(350)) { -it } },
+        popExitTransition = { slideOutHorizontally(animationSpec = tween(350)) { it } }
+    ) {
         composable("login") {
             LoginScreen(
                 onNavigateToRegister = { navController.navigate("register") },
-                onLoginSuccess = {
+                onLoginSuccess = { email ->
+                    mainViewModel.userEmail.value = email
                     navController.navigate("home") { popUpTo("login") { inclusive = true } }
                 }
             )
@@ -46,16 +60,21 @@ fun AppNavigation() {
         }
         composable("detail") {
             selectedActivity?.let { data ->
-                DetailScreen(activityData = data, onNavigateBack = { navController.popBackStack() })
+                DetailScreen(activityData = data, mainViewModel = mainViewModel, onNavigateBack = { navController.popBackStack() })
             }
         }
         composable("profile") {
-            ProfileScreen(onNavigateBack = { navController.popBackStack() }, onLogout = {
-                navController.navigate("login") { popUpTo(0) } // Reset semua stack dan balik ke login
-            })
+            ProfileScreen(
+                email = mainViewModel.userEmail.value,
+                onNavigateBack = { navController.popBackStack() },
+                onLogout = {
+                    mainViewModel.resetSession()
+                    navController.navigate("login") { popUpTo(0) }
+                }
+            )
         }
         composable("mission") {
-            MissionScreen(onNavigateBack = { navController.popBackStack() })
+            MissionScreen(mainViewModel = mainViewModel, onNavigateBack = { navController.popBackStack() })
         }
     }
 }

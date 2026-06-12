@@ -18,24 +18,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.praktikumtam_2417051001.MainViewModel
 import com.example.praktikumtam_2417051001.ui.theme.CoralPrimary
 import com.example.praktikumtam_2417051001.ui.theme.TextDark
 import com.example.praktikumtam_2417051001.ui.theme.WhitePure
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MissionScreen(onNavigateBack: () -> Unit) {
-    var exp by remember { mutableIntStateOf(0) }
-    var level by remember { mutableIntStateOf(1) }
+fun MissionScreen(mainViewModel: MainViewModel, onNavigateBack: () -> Unit) {
+    val exp = mainViewModel.exp.intValue
+    val level = mainViewModel.level.intValue
     var showLevelUpText by remember { mutableStateOf(false) }
+    var currentLevel by remember { mutableIntStateOf(level) }
 
-    // Logika level up sederhana + animasi Pop-up "Level Up!"
-    LaunchedEffect(exp) {
-        if (exp >= level * 100) {
-            level += 1
+    LaunchedEffect(level) {
+        if (level > currentLevel) {
             showLevelUpText = true
-            kotlinx.coroutines.delay(1200) // Tampilkan teks selama 1.2 detik
+            kotlinx.coroutines.delay(1200)
             showLevelUpText = false
+            currentLevel = level
         }
     }
 
@@ -60,7 +61,6 @@ fun MissionScreen(onNavigateBack: () -> Unit) {
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(padding)) {
             Column(modifier = Modifier.padding(24.dp)) {
-                // --- KARTU STATUS LEVEL & EXP (Highlight Warna Coral) ---
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
@@ -76,7 +76,7 @@ fun MissionScreen(onNavigateBack: () -> Unit) {
                         LinearProgressIndicator(
                             progress = { exp.toFloat() / (level * 100) },
                             modifier = Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(50)),
-                            color = WhitePure, // Bar progress putih di atas background coral
+                            color = WhitePure,
                             trackColor = WhitePure.copy(0.3f)
                         )
                     }
@@ -88,14 +88,16 @@ fun MissionScreen(onNavigateBack: () -> Unit) {
 
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(misiList) { misi ->
-                        MissionItem(judul = misi.first, expReward = misi.second) {
-                            exp += misi.second
+                        val isClaimed = mainViewModel.claimedMissions.contains(misi.first)
+
+                        MissionItem(judul = misi.first, expReward = misi.second, initiallyClaimed = isClaimed) {
+                            mainViewModel.addExp(misi.second)
+                            mainViewModel.claimedMissions.add(misi.first)
                         }
                     }
                 }
             }
 
-            // --- ANIMASI POP-UP "LEVEL UP!" (Overlay di tengah) ---
             AnimatedVisibility(
                 visible = showLevelUpText,
                 enter = scaleIn(initialScale = 0.3f) + fadeIn(animationSpec = tween(300)),
@@ -106,9 +108,9 @@ fun MissionScreen(onNavigateBack: () -> Unit) {
                     "LEVEL UP!",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFFFC107), // Warna emas agar mencolok
+                    color = Color(0xFFFFC107),
                     fontSize = 40.sp,
-                    modifier = Modifier.background(WhitePure.copy(0.7f), RoundedCornerShape(12.dp)).padding(horizontal = 20.dp, vertical = 8.dp)
+                    modifier = Modifier.background(WhitePure.copy(0.85f), RoundedCornerShape(12.dp)).padding(horizontal = 20.dp, vertical = 8.dp)
                 )
             }
         }
@@ -116,8 +118,8 @@ fun MissionScreen(onNavigateBack: () -> Unit) {
 }
 
 @Composable
-fun MissionItem(judul: String, expReward: Int, onClaim: () -> Unit) {
-    var claimed by remember { mutableStateOf(false) }
+fun MissionItem(judul: String, expReward: Int, initiallyClaimed: Boolean, onClaim: () -> Unit) {
+    var claimed by remember(initiallyClaimed) { mutableStateOf(initiallyClaimed) }
 
     Card(
         modifier = Modifier.fillMaxWidth().animateContentSize(),

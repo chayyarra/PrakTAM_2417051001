@@ -13,16 +13,18 @@ import androidx.compose.ui.unit.dp
 import com.example.praktikumtam_2417051001.ui.theme.CoralPrimary
 import com.example.praktikumtam_2417051001.ui.theme.TextDark
 
-
 @Composable
-fun LoginScreen(onNavigateToRegister: () -> Unit, onLoginSuccess: () -> Unit) {
+fun LoginScreen(onNavigateToRegister: () -> Unit, onLoginSuccess: (String) -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -43,24 +45,51 @@ fun LoginScreen(onNavigateToRegister: () -> Unit, onLoginSuccess: () -> Unit) {
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                isError = false
+            },
             label = { Text("Email") },
+            isError = isError,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                isError = false
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = isError,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
         )
+
+        if (isError) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = onLoginSuccess,
+            onClick = {
+                if (email.isBlank() || password.isBlank()) {
+                    isError = true
+                    errorMessage = "Email dan Password tidak boleh kosong!"
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    isError = true
+                    errorMessage = "Format email tidak valid!"
+                } else if (password.length < 6) {
+                    isError = true
+                    errorMessage = "Password minimal 6 karakter!"
+                } else {
+                    onLoginSuccess(email)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),

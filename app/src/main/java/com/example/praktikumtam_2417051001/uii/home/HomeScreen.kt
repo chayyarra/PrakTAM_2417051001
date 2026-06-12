@@ -28,6 +28,7 @@ import com.example.praktikumtam_2417051001.model.ActivityModel
 import com.example.praktikumtam_2417051001.data.api.RetrofitClient
 import com.example.praktikumtam_2417051001.ui.theme.CoralPrimary
 import com.example.praktikumtam_2417051001.ui.theme.TextDark
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +40,16 @@ fun HomeScreen(
     var activities by remember { mutableStateOf<List<ActivityModel>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var isError by remember { mutableStateOf(false) }
+
+    val greetingText = remember {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        when (hour) {
+            in 4..11 -> "Selamat Pagi ✨"
+            in 12..14 -> "Selamat Siang ☀️"
+            in 15..18 -> "Selamat Sore 🌅"
+            else -> "Selamat Malam 🌙"
+        }
+    }
 
     LaunchedEffect(Unit) {
         try {
@@ -52,9 +63,10 @@ fun HomeScreen(
     }
 
     Scaffold(
+        modifier = Modifier.statusBarsPadding(),
         topBar = {
             TopAppBar(
-                title = { Text("Aktivitas Ku", fontWeight = FontWeight.ExtraBold, color = CoralPrimary) },
+                title = { Text(greetingText, fontWeight = FontWeight.ExtraBold, color = CoralPrimary) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
                     IconButton(onClick = onNavigateToMissions) {
